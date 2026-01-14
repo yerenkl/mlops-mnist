@@ -1,10 +1,14 @@
-from torch import nn
+from torch import nn, optim
 from torch.nn import functional as F
+from pytorch_lightning import LightningModule   
+from torchmetrics.functional import accuracy
 
 
-class Model(nn.Module):
-    def __init__(self) -> None:
+class Model(LightningModule):
+    def __init__(self, lr: float = 1e-3, num_classes: int = 10) -> None:
         super().__init__()
+        self.save_hyperparameters()
+
         conv1 = nn.Conv2d(
             in_channels=1, out_channels=32, kernel_size=3, stride=1, padding=1
         )
@@ -22,8 +26,10 @@ class Model(nn.Module):
         )
 
         self.fc1 = nn.Linear(7 * 7 * 64, 256)
-        self.fc2 = nn.Linear(256, 10)
+        self.fc2 = nn.Linear(256, num_classes)
         self.dropout = nn.Dropout(0.5)
+
+        self.criterium = nn.CrossEntropyLoss()
 
     def forward(self, x):
         x = self.convs(x)
@@ -32,3 +38,34 @@ class Model(nn.Module):
         x = self.dropout(x)
         x = self.fc2(x)
         return x
+    
+    def training_step(self, batch):
+        data, target = batch
+        preds = self(data)
+        loss = self.criterium(preds, target)
+        acc = accuracy(preds, target, task='multiclass', num_classes=self.hparams.num_classes)
+        self.log("train_loss", loss, on_step=False, on_epoch=True)
+        self.log("train_acc", acc, on_step=False, on_epoch=True)
+        return loss
+    
+    def validation_step(self, batch) -> None:
+        loss, acc = self._shared_eval_step(batch)
+        self.log("val_loss", loss, on_step=False, on_epoch=True)
+        self.log("val_acc", acc, on_step=False, on_epoch=True)
+        return loss
+
+    def test_step(self, batch):
+        loss, acc = self._shared_eval_step(batch)
+        self.log("test_acc", acc, on_step=False, on_epoch=True)
+        self.log("test_loss", loss, on_step=False, on_epoch=True)
+        return loss
+    
+    def _shared_eval_step(self, batch):
+        x, y = batch
+        y_hat = self(x)
+        loss = F.cross_entropy(y_hat, y)
+        acc = accuracy(y_hat, y, task='multiclass', num_classes=self.hparams.num_classes)
+        return loss, acc
+    
+    def configure_optimizers(self):
+        return optim.Adam(self.parameters(), lr=self.hparams.lr)

@@ -58,5 +58,5 @@ def corrupt_mnist() -> tuple[torch.utils.data.Dataset, torch.utils.data.Dataset]
     return train_set, test_set
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     typer.run(preprocess_data)

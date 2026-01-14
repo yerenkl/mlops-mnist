@@ -54,6 +54,9 @@ explicit = true
 torch = { index = "pytorch" }
 torchvision = { index = "pytorch" }
 
+[tool.uv]
+package = true
+
 [tool.ruff]
 lint.select = ["I"]
 line-length=120
