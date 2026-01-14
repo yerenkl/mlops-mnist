@@ -1,8 +1,11 @@
-import torch
-from mlops_mnist.data import corrupt_mnist
-import pytest
-
 import os.path
+
+import pytest
+import torch
+
+from mlops_mnist.data import corrupt_mnist
+
+
 @pytest.mark.skipif(not os.path.exists("./data"), reason="Data files not found")
 def test_data():
     train, test = corrupt_mnist()
