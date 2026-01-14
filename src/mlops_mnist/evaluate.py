@@ -1,11 +1,10 @@
 import torch
 import typer
-from torch.utils.data import DataLoader
 from pytorch_lightning import Trainer
+from torch.utils.data import DataLoader
 
 from mlops_mnist.data import corrupt_mnist
 from mlops_mnist.model import Model
-
 
 app = typer.Typer()
 
