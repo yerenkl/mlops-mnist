@@ -1,6 +1,6 @@
+from pytorch_lightning import LightningModule
 from torch import nn, optim
 from torch.nn import functional as F
-from pytorch_lightning import LightningModule   
 from torchmetrics.functional import accuracy
 
 

@@ -1,18 +1,17 @@
 import torch
 import typer
-from torch.utils.data import DataLoader
 from pytorch_lightning import Trainer
+from torch.utils.data import DataLoader
 
 from mlops_mnist.data import corrupt_mnist
 from mlops_mnist.model import Model
-
 
 app = typer.Typer()
 
 @app.command()
 def evaluate(model_checkpoint: str) -> None:
     """Evaluate a trained model."""
-    print("Evaluating like my life depends on it")
+    print("Evaluating like my life and money depends on it")
     print(model_checkpoint)
 
     model = Model.load_from_checkpoint(model_checkpoint)

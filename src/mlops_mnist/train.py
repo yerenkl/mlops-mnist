@@ -1,9 +1,9 @@
 import torch
 import typer
-from torch.utils.data import DataLoader, random_split
 from pytorch_lightning import Trainer
-from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.loggers import WandbLogger
+from torch.utils.data import DataLoader, random_split
 
 from mlops_mnist.data import corrupt_mnist
 from mlops_mnist.model import Model

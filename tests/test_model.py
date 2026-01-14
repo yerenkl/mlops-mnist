@@ -1,11 +1,10 @@
-from mlops_mnist.model import Model
-import torch
-
-import torch
 import pytest
+import torch
 from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader, TensorDataset
+
 from mlops_mnist.model import Model  # Adjust import based on your folder structure
+
 
 def test_model():
     """
