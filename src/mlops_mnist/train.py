@@ -21,7 +21,7 @@ app = typer.Typer()
 @app.command()
 def train(lr: float = 1e-3, batch_size: int = 64, epochs: int = 5) -> None:
     """Train a model on MNIST."""
-    print("Training day and night")
+    print("Training day and night and noon")
     wandb_logger = WandbLogger(project="corrupt_mnist", log_model=True)
 
     model = Model().to(DEVICE)
