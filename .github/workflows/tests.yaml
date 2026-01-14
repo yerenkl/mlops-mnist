@@ -8,8 +8,13 @@ on:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Continue running all jobs even if one fails
+      fail-fast: false 
+      matrix:
+        os: ["ubuntu-latest"]
+        python-version: [3.12]
 
     steps:
     - name: Checkout
@@ -18,7 +23,8 @@ jobs:
     - name: Setup uv
       uses: astral-sh/setup-uv@v7
       with:
-        python-version: 3.12
+        python-version: ${{ matrix.python-version }}
+        cache: true
 
     - name: Install dependencies
       run: |
