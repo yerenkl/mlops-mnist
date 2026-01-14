@@ -2,6 +2,8 @@ import torch
 import typer
 from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
+import wandb
+from torchvision.utils import make_grid
 
 from mlops_mnist.data import corrupt_mnist
 from mlops_mnist.model import Model
@@ -18,10 +20,12 @@ app = typer.Typer()
 
 
 @app.command()
-def train(lr: float = 1e-3) -> None:
+def train(lr: float = 1e-3, batch_size: int = 64, epochs: int = 5) -> None:
     """Train a model on MNIST."""
     print("Training day and night")
-    print(lr)
+    wandb.init(
+    project="corrupt_mnist",
+    config={"lr": lr, "batch_size": batch_size, "epochs": epochs},)
 
     # TODO: Implement training loop here
     model = Model().to(DEVICE)
@@ -56,11 +60,23 @@ def train(lr: float = 1e-3) -> None:
             output = model(data)
             loss = criterion(output, target)
             train_loss_sum += loss.item() * data.size(0)
-            predicted = output.argmax(1)
-            train_correct += (predicted == target).sum().item()
+            pred = output.argmax(1)
+            train_correct += (pred == target.view_as(pred)).sum().item()
             total_train += target.size(0)
             loss.backward()
             optimizer.step()
+            if batch_idx % 100 == 0:
+                print(f"Epoch {epoch}, iter {batch_idx}, loss: {loss.item()}")
+                
+                # 1. Get batch (Keep as [5, 1, 28, 28])
+                imgs = data[:5].detach().cpu() 
+                
+                # 2. Stitch into one image using make_grid
+                grid = make_grid(imgs, normalize=True, scale_each=True)
+                
+                # 3. Log the single grid image
+                images = wandb.Image(grid, caption="Input images")
+                wandb.log({"images": images})
         avg_train_loss = train_loss_sum / len(train_dataset)
         train_acc = train_correct / total_train
 
@@ -76,13 +92,13 @@ def train(lr: float = 1e-3) -> None:
                 output = model(data)
                 val_loss_sum += criterion(output, target).item() * data.size(0)
                 pred = output.argmax(dim=1)
-                val_correct += (pred == target).sum().item()
+                val_correct += (pred == target.view_as(pred)).sum().item()
                 total_val += target.size(0)
 
-        avg_train_loss = train_loss_sum / len(train_dataset)
+        avg_val_loss = val_loss_sum / len(val_dataset)
         val_accuracy = val_correct / len(val_loader.dataset)
 
-        results["loss_val"].append(avg_train_loss)
+        results["loss_val"].append(avg_val_loss)
         results["acc_val"].append(val_accuracy)
         print(
             "Epoch [{}/{}] | Train Loss: {:.4f} | Val Loss: {:.4f} | Train Acc: {:.2f}% | Val Acc: {:.2f}%".format(
@@ -94,6 +110,7 @@ def train(lr: float = 1e-3) -> None:
                 100 * val_accuracy,
             )
         )
+        wandb.log({"train_loss": avg_train_loss, "train_accuracy": train_acc, "val_loss": avg_val_loss, "val_accuracy": val_accuracy})
 
     torch.save(model.state_dict(), "./models/model.pth")
     print("Model saved to ./models/model.pth")

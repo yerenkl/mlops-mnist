@@ -35,7 +35,7 @@ def evaluate(model_checkpoint: str) -> None:
             output = model(data)
             test_loss += criterion(output, target).item() * data.size(0)
             pred = output.argmax(dim=1, keepdim=True)
-            correct += (pred == target).sum().item()
+            correct += (pred == target.view_as(pred)).sum().item()
     test_loss /= len(test_loader.dataset)
     test_accuracy = correct / len(test_set)
     print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {100 * test_accuracy:.2f}%")

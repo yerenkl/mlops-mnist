@@ -6,6 +6,10 @@ WINDOWS = os.name == "nt"
 PROJECT_NAME = "mlops_mnist"
 PYTHON_VERSION = "3.12"
 
+@task
+def python(ctx):
+    """ """
+    ctx.run("which python" if os.name != "nt" else "where python")
 
 # Project commands
 @task
