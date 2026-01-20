@@ -1,4 +1,9 @@
 [core]
-    remote = storage
+    remote = remote_storage
 ['remote "storage"']
     url = gdrive://1Qcat0P5RESIJ-KISZ9xaAFH6ujrgZkZt
+    gdrive_use_service_account = false
+    gdrive_service_account_json_file_path = ../gdrive-sa.json
+['remote "remote_storage"']
+    url = gs://my_mlops_data_bucket_3/
+    version_aware = true
